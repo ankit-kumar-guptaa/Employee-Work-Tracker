@@ -12,7 +12,7 @@ define('DB_NAME', 'recru2l1_employee_tracker');
 // Application configuration
 define('APP_NAME', 'Employee Daily Tracker');
 define('APP_VERSION', '1.0.0');
-define('BASE_URL', 'http://localhost/employee-work-tracker');
+define('BASE_URL', 'https://employee-daily-tracker.elitecorporatesolutions.com/');
 
 // Admin credentials (hardcoded for simplicity)
 define('ADMIN_USERNAME', 'admin');
