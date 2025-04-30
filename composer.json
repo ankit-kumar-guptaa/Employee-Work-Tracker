@@ -1,0 +1,17 @@
+{
+    "name": "dell-0524/employee-work-tracker",
+    "autoload": {
+        "psr-4": {
+            "Dell0524\\EmployeeWorkTracker\\": ""
+        }
+    },
+    "authors": [
+        {
+            "name": "ANKIT KUMAR GUPTA",
+            "email": "65163759+ankit-kumar-guptaa@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "dompdf/dompdf": "^3.1"
+    }
+}
