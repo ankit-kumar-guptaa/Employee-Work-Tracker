@@ -1,9 +1,13 @@
 <?php
 // Database configuration
+// define('DB_HOST', 'localhost');
+// define('DB_USER', 'root');
+// define('DB_PASS', '');
+// define('DB_NAME', 'employee_tracker');
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'employee_tracker');
+define('DB_USER', 'recru2l1_employee_tracker');
+define('DB_PASS', 'Ankit@1925');
+define('DB_NAME', 'recru2l1_employee_tracker');
 
 // Application configuration
 define('APP_NAME', 'Employee Daily Tracker');
