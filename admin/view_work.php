@@ -335,6 +335,51 @@ include_once '../templates/header.php';
     </div>
 </div>
 
+<style>
+/* Timeline style */
+.timeline {
+    position: relative;
+    padding-left: 1rem;
+    margin: 1rem 0;
+}
+.timeline:before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #e3e6ec;
+}
+.timeline-item {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+.timeline-item-marker {
+    position: absolute;
+    left: -0.25rem;
+    width: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.timeline-item-marker-text {
+    font-size: 0.7rem;
+    color: #a2acba;
+    margin-bottom: 0.25rem;
+}
+.timeline-item-marker-indicator {
+    height: 0.75rem;
+    width: 0.75rem;
+    border-radius: 100%;
+}
+.timeline-item-content {
+    padding-top: 0.25rem;
+    padding-bottom: 1rem;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Handle details modal
@@ -403,15 +448,124 @@ document.addEventListener('DOMContentLoaded', function() {
         updatesList.innerHTML = '';
         noUpdates.style.display = 'none';
 
-        // Simulate AJAX call (in a real app, you'd fetch from server)
-        setTimeout(function() {
-            // For demo purposes, we'll just show "no updates" for now
-            updatesLoading.style.display = 'none';
-            noUpdates.style.display = 'block';
-
-            // In a real implementation, you would fetch updates from the server
-            // and populate the updatesList
-        }, 1000);
+        // Fetch updates from server
+        fetch(`<?php echo BASE_URL; ?>/admin/get_updates.php?id=${assignmentId}`)
+            .then(response => response.json())
+            .then(data => {
+                updatesLoading.style.display = 'none';
+                
+                if (data.success && data.updates.length > 0) {
+                    // Create timeline for updates
+                    const timeline = document.createElement('div');
+                    timeline.className = 'timeline';
+                    
+                    // Add each update to the timeline
+                    data.updates.forEach(update => {
+                        const timelineItem = document.createElement('div');
+                        timelineItem.className = 'timeline-item';
+                        
+                        // Create marker
+                        const marker = document.createElement('div');
+                        marker.className = 'timeline-item-marker';
+                        
+                        const markerText = document.createElement('div');
+                        markerText.className = 'timeline-item-marker-text';
+                        markerText.textContent = update.created_at.split(' ')[0] + ' ' + update.created_at.split(' ')[1];
+                        
+                        const markerIndicator = document.createElement('div');
+                        markerIndicator.className = 'timeline-item-marker-indicator bg-primary';
+                        
+                        marker.appendChild(markerText);
+                        marker.appendChild(markerIndicator);
+                        
+                        // Create content
+                        const content = document.createElement('div');
+                        content.className = 'timeline-item-content pt-0';
+                        
+                        const card = document.createElement('div');
+                        card.className = 'card mb-2';
+                        
+                        const cardBody = document.createElement('div');
+                        cardBody.className = 'card-body py-2 px-3';
+                        
+                        // Add time
+                        const time = document.createElement('div');
+                        time.className = 'small text-muted';
+                        time.textContent = update.created_at.split(' ')[2] + ' ' + update.created_at.split(' ')[3];
+                        cardBody.appendChild(time);
+                        
+                        // Add employee name
+                        const employee = document.createElement('div');
+                        employee.className = 'fw-bold';
+                        employee.textContent = update.employee_name;
+                        cardBody.appendChild(employee);
+                        
+                        // Add status badge
+                        const status = document.createElement('div');
+                        let statusBadge = '';
+                        
+                        if (update.work_status === 'pending') {
+                            statusBadge = '<span class="badge bg-warning">Pending</span>';
+                        } else if (update.work_status === 'in_progress') {
+                            statusBadge = '<span class="badge bg-info">In Progress</span>';
+                        } else if (update.work_status === 'completed') {
+                            statusBadge = '<span class="badge bg-success">Completed</span>';
+                        } else if (update.work_status === 'cancelled') {
+                            statusBadge = '<span class="badge bg-danger">Cancelled</span>';
+                        }
+                        
+                        status.innerHTML = statusBadge;
+                        cardBody.appendChild(status);
+                        
+                        // Add description
+                        if (update.update_description) {
+                            const description = document.createElement('div');
+                            description.className = 'small mt-1';
+                            description.textContent = update.update_description;
+                            cardBody.appendChild(description);
+                        }
+                        
+                        // Add hours spent
+                        if (parseFloat(update.hours_spent) > 0) {
+                            const hours = document.createElement('div');
+                            hours.className = 'small text-muted mt-1';
+                            hours.textContent = 'Time spent: ' + formatWorkTime(update.hours_spent);
+                            cardBody.appendChild(hours);
+                        }
+                        
+                        card.appendChild(cardBody);
+                        content.appendChild(card);
+                        
+                        // Assemble timeline item
+                        timelineItem.appendChild(marker);
+                        timelineItem.appendChild(content);
+                        timeline.appendChild(timelineItem);
+                    });
+                    
+                    updatesList.appendChild(timeline);
+                } else {
+                    noUpdates.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching updates:', error);
+                updatesLoading.style.display = 'none';
+                noUpdates.style.display = 'block';
+            });
+    }
+    
+    // Helper function to format work time
+    function formatWorkTime(hours) {
+        const h = Math.floor(hours);
+        const m = Math.round((hours - h) * 60);
+        
+        if (h > 0 && m > 0) {
+            return h + ' hour' + (h > 1 ? 's' : '') + ' ' + m + ' minute' + (m > 1 ? 's' : '');
+        } else if (h > 0) {
+            return h + ' hour' + (h > 1 ? 's' : '');
+        } else {
+            return m + ' minute' + (m > 1 ? 's' : '');
+        }
     }
 });
 </script>
